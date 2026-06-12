@@ -8,13 +8,6 @@ import {
   LOCATION_TYPES,
 } from "@/lib/constants";
 
-export const authSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-export type AuthFormValues = z.infer<typeof authSchema>;
-
 const optional = z.string().optional();
 const emptyOrEnum = (values: readonly string[]) => z.union([z.enum(values as [string, ...string[]]), z.literal("")]);
 

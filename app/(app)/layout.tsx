@@ -1,15 +1,9 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-
-  if (!data.user) {
-    redirect("/login");
-  }
+  await connection();
 
   return (
     <div className="flex min-h-screen">
@@ -19,7 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
       <div className="flex min-h-screen flex-1 flex-col">
-        <Topbar userEmail={data.user.email} />
+        <Topbar />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>

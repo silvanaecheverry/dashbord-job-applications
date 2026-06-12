@@ -87,15 +87,9 @@ export function InterviewForm({
       }
       toast.success("Interview updated");
     } else {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        setLoading(false);
-        toast.error("You must be signed in.");
-        return;
-      }
       const { error } = await supabase
         .from("interviews")
-        .insert({ ...payload, application_id: applicationId, user_id: userData.user.id });
+        .insert({ ...payload, application_id: applicationId });
       setLoading(false);
       if (error) {
         toast.error(error.message);

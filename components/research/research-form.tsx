@@ -70,15 +70,7 @@ export function ResearchForm({ research, onSuccess, onCancel }: ResearchFormProp
       }
       toast.success("Company research updated");
     } else {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        setLoading(false);
-        toast.error("You must be signed in.");
-        return;
-      }
-      const { error } = await supabase
-        .from("company_research")
-        .insert({ ...payload, user_id: userData.user.id });
+      const { error } = await supabase.from("company_research").insert(payload);
       setLoading(false);
       if (error) {
         toast.error(error.message);

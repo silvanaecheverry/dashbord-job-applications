@@ -1,6 +1,6 @@
 # Job Application Tracker
 
-A full-featured, mobile-first job application tracker built with Next.js, TypeScript, Tailwind CSS, and Supabase. Track applications, interviews, recruiter contacts, and company research, and get a live dashboard with KPIs and charts — all backed by per-user cloud storage.
+A full-featured, mobile-first job application tracker built with Next.js, TypeScript, Tailwind CSS, and Supabase. Track applications, interviews, recruiter contacts, and company research, and get a live dashboard with KPIs and charts — no user account or login required.
 
 ## Features
 
@@ -10,14 +10,14 @@ A full-featured, mobile-first job application tracker built with Next.js, TypeSc
 - **Company Research** — notes on companies you're targeting (industry, size, recruiters, etc.).
 - **Recruiters** — a contact list of recruiters you've worked with.
 - **Analytics & Reports** — applications by location/source, interview completion rate, offer conversion rate, full KPI grid, CSV export.
-- **Auth** — email/password sign-up and sign-in via Supabase Auth, with each user only ever seeing their own data (Postgres Row Level Security).
+- **No authentication** — open the dashboard directly and manage shared tracker data without signing in.
 - **Dark / light mode**, responsive layout (desktop, tablet, mobile), toast notifications, delete confirmations, empty/loading states.
 
 ## Tech Stack
 
 - [Next.js 16](https://nextjs.org/) (App Router, Turbopack) + React 19 + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com/)
-- [Supabase](https://supabase.com/) (Postgres + Auth, via `@supabase/supabase-js` and `@supabase/ssr`)
+- [Supabase](https://supabase.com/) (Postgres, via `@supabase/supabase-js`)
 - [react-hook-form](https://react-hook-form.com/) + [zod](https://zod.dev/) for form validation
 - [@tanstack/react-table](https://tanstack.com/table) for sortable/filterable tables
 - [Recharts](https://recharts.org/) for dashboard/analytics charts
@@ -28,9 +28,9 @@ A full-featured, mobile-first job application tracker built with Next.js, TypeSc
 
 1. Go to [supabase.com](https://supabase.com/) and create a new project.
 2. Once it's ready, open **SQL Editor** and run the contents of [`supabase/schema.sql`](./supabase/schema.sql). This creates:
-   - `profiles`, `job_applications`, `interviews`, `company_research`, and `recruiters` tables
-   - A trigger that creates a `profiles` row whenever a new user signs up
-   - Row Level Security policies so each user can only read/write their own data
+   - `job_applications`, `interviews`, `company_research`, and `recruiters` tables
+   - Public read/write access for the anon key
+   - A migration path that removes the previous auth-owned `profiles` table, `user_id` columns, and per-user RLS policies if you already ran the old schema
 3. Go to **Settings → API** and copy:
    - **Project URL**
    - **anon / public API key**
@@ -55,30 +55,29 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). You'll be redirected to `/login`, where you can create an account (email confirmation depends on your Supabase project's auth settings — by default Supabase sends a confirmation email; you can disable "Confirm email" under **Authentication → Providers → Email** for faster local testing).
+Open [http://localhost:3000](http://localhost:3000). The app opens directly to `/dashboard`; there is no sign-in or sign-up flow.
 
-If sign-up or sign-in shows `Failed to fetch`, check `.env.local` first:
+If the app shows `Failed to fetch`, check `.env.local` first:
 
 - `NEXT_PUBLIC_SUPABASE_URL` must be the exact **Project URL** from Supabase **Settings → API**.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be the matching **anon / public** key from the same project.
 - Restart `npm run dev` after changing `.env.local`; browser-exposed `NEXT_PUBLIC_` values are bundled by Next.js during development.
 - If the hostname does not resolve (`ENOTFOUND`), the project URL is mistyped, from a deleted/paused project, or not the real Supabase project URL.
 
+> This schema is intentionally public. Do not store sensitive personal data unless you add authentication and Row Level Security back.
+
 ## 4. Deploy to Vercel
 
 1. Push this repository to GitHub (or GitLab/Bitbucket).
 2. In [Vercel](https://vercel.com/), create a new project from the repo.
 3. Add the same two environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in **Project Settings → Environment Variables**.
-4. Deploy. Vercel will build and host the Next.js app; Supabase continues to handle auth and data.
-5. In your Supabase project, go to **Authentication → URL Configuration** and add your Vercel deployment URL to the **Site URL** and **Redirect URLs** so email confirmation links work correctly.
+4. Deploy. Vercel will build and host the Next.js app; Supabase continues to store the tracker data.
 
 ## Project Structure
 
 ```
 app/
-  login/                  Sign in / sign up
-  auth/callback/          Email confirmation handler
-  (app)/                  Protected app shell (sidebar + topbar)
+  (app)/                  App shell (sidebar + topbar)
     dashboard/            KPIs + charts
     applications/         List, add, edit (with interviews)
     interviews/           All interviews across applications
@@ -90,12 +89,12 @@ components/
   layout/                  Sidebar, Topbar, mobile nav, theme toggle
   applications/, interviews/, research/, recruiters/, charts/, analytics/
 lib/
-  supabase/                Browser/server Supabase clients + session middleware
+  supabase/                Browser/server Supabase clients
   types.ts, constants.ts   Domain types and dropdown options
   validations.ts           Zod schemas
   analytics.ts             KPI and chart data calculations
   csv.ts                   CSV export helper
-supabase/schema.sql         Database schema + RLS policies
+supabase/schema.sql         Public database schema
 ```
 
 ## Scripts

@@ -66,13 +66,7 @@ export function RecruiterForm({ recruiter, onSuccess, onCancel }: RecruiterFormP
       }
       toast.success("Recruiter updated");
     } else {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        setLoading(false);
-        toast.error("You must be signed in.");
-        return;
-      }
-      const { error } = await supabase.from("recruiters").insert({ ...payload, user_id: userData.user.id });
+      const { error } = await supabase.from("recruiters").insert(payload);
       setLoading(false);
       if (error) {
         toast.error(error.message);

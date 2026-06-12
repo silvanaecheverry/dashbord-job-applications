@@ -106,16 +106,7 @@ export function ApplicationForm({ application }: ApplicationFormProps) {
       router.push("/applications");
       router.refresh();
     } else {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        setLoading(false);
-        toast.error("You must be signed in.");
-        return;
-      }
-
-      const { error } = await supabase
-        .from("job_applications")
-        .insert({ ...payload, user_id: userData.user.id });
+      const { error } = await supabase.from("job_applications").insert(payload);
 
       setLoading(false);
 

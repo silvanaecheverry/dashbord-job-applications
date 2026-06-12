@@ -18,7 +18,6 @@ export type InterviewType = "In Person" | "Remote";
 
 export interface JobApplication {
   id: string;
-  user_id: string;
   company: string;
   role: string;
   opening_date: string | null;
@@ -43,13 +42,12 @@ export interface JobApplication {
 
 export type JobApplicationInput = Omit<
   JobApplication,
-  "id" | "user_id" | "created_at" | "updated_at"
+  "id" | "created_at" | "updated_at"
 >;
 
 export interface Interview {
   id: string;
   application_id: string;
-  user_id: string;
   interview_number: number;
   date: string | null;
   time: string | null;
@@ -67,12 +65,11 @@ export interface Interview {
 
 export type InterviewInput = Omit<
   Interview,
-  "id" | "application_id" | "user_id" | "created_at" | "updated_at"
+  "id" | "application_id" | "created_at" | "updated_at"
 >;
 
 export interface CompanyResearch {
   id: string;
-  user_id: string;
   company: string;
   website: string | null;
   location: string | null;
@@ -87,12 +84,11 @@ export interface CompanyResearch {
 
 export type CompanyResearchInput = Omit<
   CompanyResearch,
-  "id" | "user_id" | "created_at" | "updated_at"
+  "id" | "created_at" | "updated_at"
 >;
 
 export interface Recruiter {
   id: string;
-  user_id: string;
   name: string;
   linkedin_url: string | null;
   company: string | null;
@@ -103,7 +99,7 @@ export interface Recruiter {
   updated_at: string;
 }
 
-export type RecruiterInput = Omit<Recruiter, "id" | "user_id" | "created_at" | "updated_at">;
+export type RecruiterInput = Omit<Recruiter, "id" | "created_at" | "updated_at">;
 
 export interface InterviewWithApplication extends Interview {
   job_applications: {
