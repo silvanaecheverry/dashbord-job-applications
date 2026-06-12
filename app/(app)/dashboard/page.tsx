@@ -13,6 +13,7 @@ import {
   pipelineFunnelData,
 } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/server";
+import { safeCount, safeList } from "@/lib/supabase/safe-query";
 import type { Interview, JobApplication } from "@/lib/types";
 import {
   Activity,
@@ -28,16 +29,16 @@ import {
 } from "lucide-react";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
-  const [{ data: applications }, { data: interviews }, { count: companiesResearched }] = await Promise.all([
-    supabase.from("job_applications").select("*"),
-    supabase.from("interviews").select("*"),
-    supabase.from("company_research").select("*", { count: "exact", head: true }),
+  const [apps, ivs, companiesResearched] = await Promise.all([
+    safeList<JobApplication>("job applications", supabase.from("job_applications").select("*")),
+    safeList<Interview>("interviews", supabase.from("interviews").select("*")),
+    safeCount(
+      "companies researched",
+      supabase.from("company_research").select("*", { count: "exact", head: true }),
+    ),
   ]);
-
-  const apps = (applications as JobApplication[]) ?? [];
-  const ivs = (interviews as Interview[]) ?? [];
 
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
